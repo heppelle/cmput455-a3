@@ -277,11 +277,11 @@ class GtpConnection():
             # call the random policy file, with selection mechanism
             # self.selection_type
             #sim_instance = Go3(self.num_sim, self.selection_type, self.policy_type, False, self.board.size, 100)  #change last paramer?
-            points = get_move(self.board.copy(), self.board.current_player, self.selection_type, self.num_sim)
-            movelist = []
-            for point in points:
-                coord = point_to_coord(point, self.board.size)
-                movelist.append(format_point(coord))
+            output = get_move(self.board.copy(), self.board.current_player, self.selection_type, self.num_sim)
+            #movelist = []
+            #for point in points:
+            #    coord = point_to_coord(point, self.board.size)
+            #    movelist.append(format_point(coord))
 
         elif (self.policy_type == "pattern"):
             # call the pattern policy file, with selection mechanism
@@ -292,7 +292,7 @@ class GtpConnection():
         #movelist.append(len(movelist))
         #coord = point_to_coord(point, self.board.size)
         #self.respond(format_point(coord))
-        self.respond(movelist)
+        self.respond(output)
 
     def policy_cmd(self, args):
 
