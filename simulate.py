@@ -7,7 +7,7 @@
 from board_util import GoBoardUtil
 from pattern_util import PatternUtil
 from simple_board import SimpleGoBoard
-from ucb import findBest, bestArm
+from ucb import findBest, bestArm, runUcb
 import numpy as np
 import argparse
 import sys
@@ -106,20 +106,6 @@ def get_move(board, color, selection_policy, sim_num):
         return writeMoves(board, moves, moveWins, sim_num)
         #return moveWins
         #return select_best_move(board, moves, moveWins)
-
-def runUcb(board, C, moves, toplay, sim_num):
-    stats = [[0,0] for _ in moves]
-    num_simulation = len(moves) * sim_num
-    for n in range(num_simulation):
-        moveIndex = findBest(stats, C, n)
-        result = simulate(board, moves[moveIndex], toplay)
-        if result == toplay:
-            stats[moveIndex][0] += 1 # win
-        stats[moveIndex][1] += 1
-    bestIndex = bestArm(stats)
-    best = moves[bestIndex]
-    #writeMoves_ucb(board, moves, stats)
-    return best
 
 def point_to_coord(point, boardsize):
     """
