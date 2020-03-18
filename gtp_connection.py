@@ -281,6 +281,7 @@ class GtpConnection():
         elif (self.policy_type == "pattern"):
             # call the pattern policy file, with selection mechanism
             # self.selection_type
+            output = get_pattern_move(self.board.copy(), self.board.current_player, self.selection_type, self.num_sim)
             pass
         else:
             self.respond()

@@ -105,6 +105,95 @@ def get_move(board, color, selection_policy, sim_num):
         #return moveWins
         #return select_best_move(board, moves, moveWins)
 
+def get_pattern_move(board, color, selection_policy, sim_num):
+    """
+    Run one-ply MC simulations to get a move to play.
+    """
+    
+    emptyPoints = board.get_empty_points()
+    moves = []
+    for p in emptyPoints:
+        if board.is_legal(p, color):
+            moves.append(p)
+    if not moves:
+        return None
+    
+    patterns = extract_pattern_weights(board, moves, color)
+    ##HERE
+    if selection_policy == "ucb":
+        C = 0.4 #sqrt(2) is safe, this is more aggressive
+        best = runUcb(board, C, moves, color, sim_num)
+        return best
+    else:
+        moveWins = []
+        for move in moves:
+            wins = simulateMove(board, move, color, sim_num)
+            moveWins.append(wins)
+        return writeMoves(board, moves, moveWins, sim_num)
+
+def extract_pattern_weights(board, moves, color):
+    #Function for taking all currently legal moves, and extracting the mini 3x3 positions around them.
+    small_boards = get_small_boards(board,moves,color)
+    if color == 2:
+        #white player, need to flip board to use for pattern mathcing
+        for small_board in small_boards:
+            for i in range(0,len(small_board)):
+                if(small_board[i]==1):
+                    small_board[i] = 2
+                elif(small_board[i]==2):
+                    small_board[i]=1
+    
+    weights = get_weights(small_boards)
+    lines = []
+    with open("weights") as fp:
+        for i, line in enumerate(fp):
+            if i in weights:
+                lines.append(line)
+    #have the weights we want
+    return lines
+
+def get_weights(boards):
+    weights = []
+    for b in boards:
+        temp = ""
+        for i in b:
+            temp += str(i)
+        weights.append(temp)
+    baseten=[]
+    for weight in weights:
+        bten=0
+        for i in range(0,len(weight)):
+            bten += int(weight[i])* (4^(7-i))
+        baseten.append(bten)
+    return baseten
+
+
+def get_small_boards(board,moves,color):
+    #function to get 3x3 board around empty point
+    small_boards = []
+    for point in moves:
+        small_boards.append(get_neighbors(board, point))
+    return small_boards
+        
+
+def get_neighbors(board, point):
+    #adapted from simple_board.py
+    return [point - board.NS + 1,  point - board.NS, point - board.NS - 1, point + 1, point-1,point + board.NS + 1, point + board.NS, point + board.NS - 1]
+
+def runUcb(board, C, moves, toplay, sim_num):
+    stats = [[0,0] for _ in moves]
+    num_simulation = len(moves) * sim_num
+    for n in range(num_simulation):
+        moveIndex = findBest(stats, C, n)
+        result = simulate(board, moves[moveIndex], toplay)
+        if result == toplay:
+            stats[moveIndex][0] += 1 # win
+        stats[moveIndex][1] += 1
+    bestIndex = bestArm(stats)
+    best = moves[bestIndex]
+    #writeMoves_ucb(board, moves, stats)
+    return best
+
 def point_to_coord(point, boardsize):
     """
     Transform point given as board array index 
