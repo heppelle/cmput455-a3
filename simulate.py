@@ -126,21 +126,26 @@ def get_pattern_move(board, color, selection_policy, sim_num):
         return None
     
     patterns = extract_pattern_weights(board, moves, color)
-    ##HERE
-    if selection_policy == "ucb":
-        C = 0.4 #sqrt(2) is safe, this is more aggressive
-        best = runUcb(board, C, moves, color, sim_num, get_best)
-        return best
-    else:
-        moveWins = []
-        for move in moves:
-            wins = simulateMove(board, move, color, sim_num)
-            moveWins.append(wins)
-        return writeMoves(board, moves, moveWins, sim_num)
+    print(moves)
+    print(patterns)
+    weight_total = sum(patterns[1].values())
+    print(weight_total)
+
+    # if selection_policy == "ucb":
+    #     C = 0.4 #sqrt(2) is safe, this is more aggressive
+    #     best = runUcb(board, C, moves, color, sim_num, get_best)
+    #     return best
+    # else:
+    #     moveWins = []
+    #     for move in moves:
+    #         wins = simulateMove(board, move, color, sim_num)
+    #         moveWins.append(wins)
+    #     return writeMoves(board, moves, moveWins, sim_num)
 
 def extract_pattern_weights(board, moves, color):
     #Function for taking all currently legal moves, and extracting the mini 3x3 positions around them.
     small_boards = get_small_boards(board,moves,color)
+
     if color == 2:
         #white player, need to flip board to use for pattern mathcing
         for small_board in small_boards:
@@ -151,13 +156,17 @@ def extract_pattern_weights(board, moves, color):
                     small_board[i]=1
     
     weights = get_weights(small_boards)
+
     lines = []
     with open("weights") as fp:
         for i, line in enumerate(fp):
             if i in weights:
-                lines.append(line)
+                lines.append(line[:-1])
+    dictionary = dict(s.split(' ') for s in lines)
+    d = {int(k):float(v) for k,v in dictionary.items()}
+    
     #have the weights we want
-    return lines
+    return (weights,d)
 
 def get_weights(boards):
     weights = []
@@ -167,8 +176,10 @@ def get_weights(boards):
             temp += str(i)
         weights.append(temp)
     baseten=[]
+    
     for weight in weights:
         bten=0
+        
         for i in range(0,len(weight)):
             bten += int(weight[i])* (4^(7-i))
         baseten.append(bten)
@@ -179,7 +190,7 @@ def get_small_boards(board,moves,color):
     #function to get 3x3 board around empty point
     small_boards = []
     for point in moves:
-        small_boards.append(get_neighbors(board, point))
+        small_boards.append(board.board[get_neighbors(board, point)])
     return small_boards
         
 
