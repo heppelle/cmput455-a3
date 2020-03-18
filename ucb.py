@@ -77,15 +77,16 @@ def writeMoves(board, moves, stats):
     #                 .format(sorted(gtp_moves, key = byPulls,
     #                                           reverse = True)))
     sorted(gtp_moves, key = byPercentage, reverse = True)
-    output = []
-    prob = []
+    points = []
+    probs = []
     for pair in gtp_moves:
-        output.append(pair[0])
-        prob.append(pair[1])
-    total = sum(prob)
-    for probability in prob:
-        output.append(round(probability/total, 3))
-    return output
+        points.append(pair[0])
+        probs.append(pair[1])
+    total = sum(probs)
+    probs_out = []
+    for probability in probs:
+        probs_out.append(round(probability/total, 3))
+    return points, probs_out
 
 def simulate(board, move, toplay):
         """
@@ -102,7 +103,7 @@ def simulate(board, move, toplay):
                                     use_pattern = False,           #implement a way to change this accordingly
                                     check_selfatari = False)
 
-def runUcb(board, C, moves, toplay, sim_num):
+def runUcb(board, C, moves, toplay, sim_num, get_best):
     stats = [[0,0] for _ in moves]
     num_simulation = len(moves) * sim_num
     for n in range(num_simulation):
@@ -111,10 +112,12 @@ def runUcb(board, C, moves, toplay, sim_num):
         if result == toplay:
             stats[moveIndex][0] += 1 # win
         stats[moveIndex][1] += 1
-    #bestIndex = bestArm(stats)
-    #best = moves[bestIndex]
-
-    return writeMoves(board, moves, stats)
+    if get_best:
+        bestIndex = bestArm(stats)
+        best = moves[bestIndex]
+        return best
+    else:
+        return writeMoves(board, moves, stats)
     #return best
 
 def point_to_coord(point, boardsize):

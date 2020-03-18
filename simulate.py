@@ -22,6 +22,9 @@ MAXSIZE = 25
 def byPercentage(pair):
     return pair[1]
 
+def byCoord(pair):
+    return pair[0]
+
 def writeMoves(board, moves, count, numSimulations):
     #Write simulation results for each move.
 
@@ -35,16 +38,18 @@ def writeMoves(board, moves, count, numSimulations):
     #sys.stderr.write("win rates: {}\n"
     #                 .format(sorted(gtp_moves, key = byPercentage,
     #                                reverse = True)))
-    sorted(gtp_moves, key = byPercentage, reverse = True)
-    output = []
-    prob = []
+    
+    sorted(gtp_moves, key = byCoord, reverse = True)
+    points = []
+    probs = []
     for pair in gtp_moves:
-        output.append(pair[0])
-        prob.append(pair[1])
-    total = sum(prob)
-    for probability in prob:
-        output.append(round(probability/total, 3))
-    return output
+        points.append(pair[0])
+        probs.append(pair[1])
+    total = sum(probs)
+    probs_out = []
+    for probability in probs:
+        probs_out.append((round(probability/total, 3)))
+    return points, probs_out
 
 def select_best_move(board, moves, moveWins):
     """
@@ -79,7 +84,7 @@ def simulateMove(board, move, toplay, sim_num):
             wins += 1
     return wins
 
-def get_move(board, color, selection_policy, sim_num):
+def get_move(board, color, selection_policy, sim_num, get_best):
     """
     Run one-ply MC simulations to get a move to play.
     """
@@ -94,21 +99,23 @@ def get_move(board, color, selection_policy, sim_num):
     moves.append(None)
     if selection_policy == "ucb":
         C = 0.4 #sqrt(2) is safe, this is more aggressive
-        best = runUcb(board, C, moves, color, sim_num)
-        return best
+        return runUcb(board, C, moves, color, sim_num, get_best)
     else:
         moveWins = []
         for move in moves:
             wins = simulateMove(board, move, color, sim_num)
             moveWins.append(wins)
-        return writeMoves(board, moves, moveWins, len(moves)*sim_num)
+        if get_best:
+            return select_best_move(board, moves, moveWins)
+        else:
+            return writeMoves(board, moves, moveWins, len(moves)*sim_num)
         #return moveWins
         #return select_best_move(board, moves, moveWins)
 
 def get_pattern_move(board, color, selection_policy, sim_num):
-    """
-    Run one-ply MC simulations to get a move to play.
-    """
+
+    #Run one-ply MC simulations to get a move to play.
+    get_best = False
     
     emptyPoints = board.get_empty_points()
     moves = []
@@ -122,7 +129,7 @@ def get_pattern_move(board, color, selection_policy, sim_num):
     ##HERE
     if selection_policy == "ucb":
         C = 0.4 #sqrt(2) is safe, this is more aggressive
-        best = runUcb(board, C, moves, color, sim_num)
+        best = runUcb(board, C, moves, color, sim_num, get_best)
         return best
     else:
         moveWins = []
@@ -179,20 +186,6 @@ def get_small_boards(board,moves,color):
 def get_neighbors(board, point):
     #adapted from simple_board.py
     return [point - board.NS + 1,  point - board.NS, point - board.NS - 1, point + 1, point-1,point + board.NS + 1, point + board.NS, point + board.NS - 1]
-
-def runUcb(board, C, moves, toplay, sim_num):
-    stats = [[0,0] for _ in moves]
-    num_simulation = len(moves) * sim_num
-    for n in range(num_simulation):
-        moveIndex = findBest(stats, C, n)
-        result = simulate(board, moves[moveIndex], toplay)
-        if result == toplay:
-            stats[moveIndex][0] += 1 # win
-        stats[moveIndex][1] += 1
-    bestIndex = bestArm(stats)
-    best = moves[bestIndex]
-    #writeMoves_ucb(board, moves, stats)
-    return best
 
 def point_to_coord(point, boardsize):
     """

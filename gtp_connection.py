@@ -12,7 +12,7 @@ from board_util import GoBoardUtil, BLACK, WHITE, EMPTY, BORDER, PASS, \
                        MAXSIZE, coord_to_point
 import numpy as np
 import re
-from simulate import get_move
+from simulate import get_move, get_pattern_move
 
 class GtpConnection():
 
@@ -262,7 +262,18 @@ class GtpConnection():
         """
         board_color = args[0].lower()
         color = color_to_int(board_color)
-        move = self.go_engine.get_move(self.board, color)
+        if (self.policy_type == "random"):
+            # call the random policy file, with selection mechanism
+            # self.selection_type
+            move = get_move(self.board.copy(), color, self.selection_type, self.num_sim, True)
+        elif (self.policy_type == "pattern"):
+            # call the pattern policy file, with selection mechanism
+            # self.selection_type
+            move= get_pattern_move(self.board.copy(), self.board.current_player, self.selection_type, self.num_sim)
+
+        else:
+            pass
+        #move = self.go_engine.get_move(self.board, color)
         move_coord = point_to_coord(move, self.board.size)
         move_as_string = format_point(move_coord)
         if self.board.is_legal(move, color):
@@ -276,8 +287,9 @@ class GtpConnection():
         if (self.policy_type == "random"):
             # call the random policy file, with selection mechanism
             # self.selection_type
-            output = get_move(self.board.copy(), self.board.current_player, self.selection_type, self.num_sim)
-            
+            moves, probs = get_move(self.board.copy(), self.board.current_player, self.selection_type, self.num_sim, False)
+            probs = [str(i) for i in probs]
+            output = moves + probs
         elif (self.policy_type == "pattern"):
             # call the pattern policy file, with selection mechanism
             # self.selection_type
@@ -285,7 +297,7 @@ class GtpConnection():
             pass
         else:
             self.respond()
-        self.respond(output)
+        self.respond(" ".join(output))
 
     def policy_cmd(self, args):
 
