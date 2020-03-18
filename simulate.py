@@ -7,7 +7,7 @@
 from board_util import GoBoardUtil
 from pattern_util import PatternUtil
 from simple_board import SimpleGoBoard
-from ucb import findBest, bestArm
+from ucb import findBest, bestArm, runUcb
 import numpy as np
 import argparse
 import sys
