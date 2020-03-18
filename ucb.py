@@ -65,7 +65,7 @@ def writeMoves(board, moves, stats):
         #    pointString = 'Pass'
         if stats[i][1] != 0:
             gtp_moves.append((pointString,
-                            round(stats[i][0]/stats[i][1],3)))
+                            stats[i][0]/stats[i][1]))
                             #stats[i][0],
                             #stats[i][1]))
         else:
@@ -77,13 +77,15 @@ def writeMoves(board, moves, stats):
     #                 .format(sorted(gtp_moves, key = byPulls,
     #                                           reverse = True)))
     sorted(gtp_moves, key = byPercentage, reverse = True)
-    coord = []
+    output = []
     prob = []
     for pair in gtp_moves:
-        coord.append(pair[0])
+        output.append(pair[0])
         prob.append(pair[1])
-    return coord + prob
-    #sys.stderr.flush()
+    total = sum(prob)
+    for probability in prob:
+        output.append(round(probability/total, 3))
+    return output
 
 def simulate(board, move, toplay):
         """

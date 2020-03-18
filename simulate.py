@@ -29,24 +29,22 @@ def writeMoves(board, moves, count, numSimulations):
     for i in range(len(moves)):
         if moves[i] != None:
             x, y = point_to_coord(moves[i], board.size)
-            gtp_moves.append((format_point((x, y)), round(float(count[i])/float(numSimulations),3)))
+            gtp_moves.append((format_point((x, y)), float(count[i])/float(numSimulations)))
         #else:
         #    gtp_moves.append(('Pass',float(count[i])/float(numSimulations)))
     #sys.stderr.write("win rates: {}\n"
     #                 .format(sorted(gtp_moves, key = byPercentage,
     #                                reverse = True)))
     sorted(gtp_moves, key = byPercentage, reverse = True)
-    coord = []
+    output = []
     prob = []
-    #output = []
     for pair in gtp_moves:
-        coord.append(pair[0])
+        output.append(pair[0])
         prob.append(pair[1])
-    return coord + prob
-
-
-#sys.stderr.flush()
-
+    total = sum(prob)
+    for probability in prob:
+        output.append(round(probability/total, 3))
+    return output
 
 def select_best_move(board, moves, moveWins):
     """
@@ -103,7 +101,7 @@ def get_move(board, color, selection_policy, sim_num):
         for move in moves:
             wins = simulateMove(board, move, color, sim_num)
             moveWins.append(wins)
-        return writeMoves(board, moves, moveWins, sim_num)
+        return writeMoves(board, moves, moveWins, len(moves)*sim_num)
         #return moveWins
         #return select_best_move(board, moves, moveWins)
 
