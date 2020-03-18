@@ -125,22 +125,13 @@ def get_pattern_move(board, color, selection_policy, sim_num):
     if not moves:
         return None
     
-    patterns = extract_pattern_weights(board, moves, color)
-    print(moves)
-    print(patterns)
-    weight_total = sum(patterns[1].values())
-    print(weight_total)
+    (weights,d, weight_total) = extract_pattern_weights(board, moves, color)
+    
+    result = {}
+    for i in range(len(moves)):
+        result[moves[i]] = d[weights[i]] / weight_total
 
-    # if selection_policy == "ucb":
-    #     C = 0.4 #sqrt(2) is safe, this is more aggressive
-    #     best = runUcb(board, C, moves, color, sim_num, get_best)
-    #     return best
-    # else:
-    #     moveWins = []
-    #     for move in moves:
-    #         wins = simulateMove(board, move, color, sim_num)
-    #         moveWins.append(wins)
-    #     return writeMoves(board, moves, moveWins, sim_num)
+    return result
 
 def extract_pattern_weights(board, moves, color):
     #Function for taking all currently legal moves, and extracting the mini 3x3 positions around them.
@@ -162,11 +153,16 @@ def extract_pattern_weights(board, moves, color):
         for i, line in enumerate(fp):
             if i in weights:
                 lines.append(line[:-1])
+    total =0
     dictionary = dict(s.split(' ') for s in lines)
     d = {int(k):float(v) for k,v in dictionary.items()}
+    for weight in weights:
+        total += d[weight]
+    print(total)
+    
     
     #have the weights we want
-    return (weights,d)
+    return (weights,d, total)
 
 def get_weights(boards):
     weights = []
