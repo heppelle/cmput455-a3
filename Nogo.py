@@ -1,5 +1,5 @@
 #/usr/local/bin/python
-#!C:/Users/Ahzam Ahmad/AppData/Local/Programs/Python/Python37-32
+#!/usr/bin/python
 # Set the path to your python3 above
 
 from gtp_connection import GtpConnection
