@@ -158,7 +158,7 @@ def extract_pattern_weights(board, moves, color):
     d = {int(k):float(v) for k,v in dictionary.items()}
     for weight in weights:
         total += d[weight]
-    print(total)
+
     
     
     #have the weights we want
@@ -172,13 +172,14 @@ def get_weights(boards):
             temp += str(i)
         weights.append(temp)
     baseten=[]
-    
+
     for weight in weights:
         bten=0
-        
         for i in range(0,len(weight)):
-            bten += int(weight[i])* (4^(7-i))
+            
+            bten += int(weight[i]) * (4**(7-i))
         baseten.append(bten)
+
     return baseten
 
 

@@ -290,14 +290,26 @@ class GtpConnection():
             moves, probs = get_move(self.board.copy(), self.board.current_player, self.selection_type, self.num_sim, False)
             probs = [str(i) for i in probs]
             output = moves + probs
+            self.respond(" ".join(output))
         elif (self.policy_type == "pattern"):
             # call the pattern policy file, with selection mechanism
             # self.selection_type
             output = get_pattern_move(self.board.copy(), self.board.current_player, self.selection_type, self.num_sim)
-            pass
+            moves = []
+            probs = {}
+            for key,val in output.items():
+                moves.append(format_point(point_to_coord(key, self.board.size)))
+                probs[moves[-1]] = val
+            moves = sorted(moves)
+            finalMoves = ' '.join(moves)
+            for move in moves:
+                finalMoves+= " " + str(round(probs[move],3))
+            output = finalMoves
+            self.respond(output)
+            
         else:
             self.respond()
-        self.respond(" ".join(output))
+        
 
     def policy_cmd(self, args):
 
@@ -395,8 +407,8 @@ def format_point(move):
     """
     Return move coordinates as a string such as 'a1', or 'pass'.
     """
-    column_letters = "ABCDEFGHJKLMNOPQRSTUVWXYZ"
-    #column_letters = "abcdefghjklmnopqrstuvwxyz"
+    #column_letters = "ABCDEFGHJKLMNOPQRSTUVWXYZ"
+    column_letters = "abcdefghjklmnopqrstuvwxyz"
     if move == PASS:
         return "pass"
     row, col = move
