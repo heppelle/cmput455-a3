@@ -1,0 +1,14 @@
+boardsize 4
+num_sim 100
+selection rr
+clear_board
+play B B4
+play W C4
+play B A3
+play W B3
+play B C2
+play W D3
+play B B1
+play W D1
+policy pattern
+genmove b

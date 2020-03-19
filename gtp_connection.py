@@ -12,6 +12,7 @@ from board_util import GoBoardUtil, BLACK, WHITE, EMPTY, BORDER, PASS, \
                        MAXSIZE, coord_to_point
 import numpy as np
 import re
+from random import *
 from simulate import get_move, get_pattern_move
 
 class GtpConnection():
@@ -71,7 +72,8 @@ class GtpConnection():
             "play": (2, 'Usage: play {b,w} MOVE'),
             "legal_moves": (1, 'Usage: legal_moves {w,b}'),
             "policy": (1, 'Usage: policy {random,pattern}'),
-            "selection": (1, 'Usage: selection {rr,ucb}')
+            "selection": (1, 'Usage: selection {rr,ucb}'),
+            "num_sim": (1, 'Usage: num_sim {n}')
         }
     
     def write(self, data):
@@ -268,8 +270,16 @@ class GtpConnection():
             move = get_move(self.board.copy(), color, self.selection_type, self.num_sim, True)
         elif (self.policy_type == "pattern"):
             # call the pattern policy file, with selection mechanism
-            # self.selection_type
-            move= get_pattern_move(self.board.copy(), self.board.current_player, self.selection_type, self.num_sim)
+            genProb = uniform(0,1)
+            output= get_pattern_move(self.board.copy(), self.board.current_player, self.selection_type, self.num_sim)
+            for key,val in output.items():
+                genProb -= val
+                if(genProb <= 0):
+                    move = key
+                    break
+            
+            
+
 
         else:
             pass
